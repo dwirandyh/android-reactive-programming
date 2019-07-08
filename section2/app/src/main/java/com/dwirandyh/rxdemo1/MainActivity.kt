@@ -7,6 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -15,9 +16,11 @@ class MainActivity : AppCompatActivity() {
     val TAG: String = "MainActivity"
     val greeting: String = "Hello From RxKotlin"
     lateinit var observable: Observable<String>
-    lateinit var myObserver: Observer<String>
 
-    lateinit var disposable: Disposable
+    //lateinit var myObserver: Observer<String>
+    // lateinit var disposable: Disposable
+
+    lateinit var myObserver: DisposableObserver<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +34,23 @@ class MainActivity : AppCompatActivity() {
         // observable schedulers mainThread/UIThread
         observable.observeOn(AndroidSchedulers.mainThread())
 
-        myObserver = getObserver()
+        //myObserver = getObserver()
+        //observable.subscribe(myObserver)
+
+        myObserver = object : DisposableObserver<String>() {
+            override fun onComplete() {
+                Log.i(TAG, "onComplete Invoked")
+            }
+
+            override fun onNext(t: String) {
+                Log.i(TAG, "onNext Invoked")
+            }
+
+            override fun onError(e: Throwable) {
+                Log.i(TAG, "onError Invoked")
+            }
+
+        }
 
         observable.subscribe(myObserver)
     }
@@ -45,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSubscribe(d: Disposable) {
                 Log.i(TAG, "onSubscribe Invoked")
-                disposable = d
+                //disposable = d
             }
 
             override fun onNext(t: String) {
@@ -63,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.dispose()
+       //disposable.dispose()
+
+        myObserver.dispose()
     }
 }
