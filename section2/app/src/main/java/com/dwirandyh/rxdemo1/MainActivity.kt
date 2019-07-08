@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         //myObserver = getObserver()
         //observable.subscribe(myObserver)
 
+        /*
         myObserver = object : DisposableObserver<String>() {
             override fun onComplete() {
                 Log.i(TAG, "onComplete Invoked")
@@ -75,38 +76,27 @@ class MainActivity : AppCompatActivity() {
 
         observable.subscribe(myObserver2)
 
-        
+
         compositeDisposable.addAll(myObserver2, myObserver)
-    }
+        */
+        compositeDisposable.add(
+            observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(myObserver)
+        )
 
-    fun getObserver(): Observer<String> {
-        val mySubscriber = object : Observer<String> {
-            override fun onComplete() {
-                Log.i(TAG, "onComplete Invoked")
-
-            }
-
-            override fun onSubscribe(d: Disposable) {
-                Log.i(TAG, "onSubscribe Invoked")
-                //disposable = d
-            }
-
-            override fun onNext(t: String) {
-                Log.i(TAG, "onNext Invoked")
-                tvGreeting.text = t
-            }
-
-            override fun onError(e: Throwable) {
-                Log.i(TAG, "On error Invoked")
-            }
-
-        }
-        return mySubscriber
+        compositeDisposable.add(
+            observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(myObserver2)
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-       //disposable.dispose()
+        //disposable.dispose()
 
         //myObserver.dispose()
         compositeDisposable.clear()
