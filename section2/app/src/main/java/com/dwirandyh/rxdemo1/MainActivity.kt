@@ -6,6 +6,7 @@ import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -21,6 +22,9 @@ class MainActivity : AppCompatActivity() {
     // lateinit var disposable: Disposable
 
     lateinit var myObserver: DisposableObserver<String>
+    lateinit var myObserver2: DisposableObserver<String>
+
+    val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +57,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         observable.subscribe(myObserver)
+
+        myObserver2 = object : DisposableObserver<String>() {
+            override fun onComplete() {
+                Log.i(TAG, "onComplete Invoked")
+            }
+
+            override fun onNext(t: String) {
+                Log.i(TAG, "onNext Invoked")
+            }
+
+            override fun onError(e: Throwable) {
+                Log.i(TAG, "onError Invoked")
+            }
+
+        }
+
+        observable.subscribe(myObserver2)
+
+        
+        compositeDisposable.addAll(myObserver2, myObserver)
     }
 
     fun getObserver(): Observer<String> {
@@ -84,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
        //disposable.dispose()
 
-        myObserver.dispose()
+        //myObserver.dispose()
+        compositeDisposable.clear()
     }
 }
