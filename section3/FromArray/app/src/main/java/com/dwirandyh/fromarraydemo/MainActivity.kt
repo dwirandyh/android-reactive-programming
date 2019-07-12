@@ -15,8 +15,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var myObservable: Observable<String>
     private lateinit var myObserver: DisposableObserver<String>
 
+    private lateinit var myRangeObservable: Observable<Int>
+    private lateinit var myIntObserver: DisposableObserver<Int>
+
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private var greetings = arrayOf("Hello A", "Hello B", "Hello C")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,17 +31,27 @@ class MainActivity : AppCompatActivity() {
         // for passing array info function
         myObservable = Observable.fromArray(*greetings)
 
-        compositeDisposable.add(
+
+        // emit data in a range one by one
+        myRangeObservable = Observable.range(1, 20)
+
+
+        compositeDisposable.addAll(
             myObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(getObserver())
+                .subscribeWith(getObserver()),
+
+            myRangeObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getIntObserver())
         )
     }
 
     private fun getObserver(): DisposableObserver<String> {
 
-        myObserver = object:  DisposableObserver<String>(){
+        myObserver = object : DisposableObserver<String>() {
             override fun onComplete() {
                 Log.i(TAG, " onComplete Invoked")
             }
@@ -53,5 +67,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         return myObserver
+    }
+
+    private fun getIntObserver(): DisposableObserver<Int> {
+        myIntObserver = object : DisposableObserver<Int>() {
+            override fun onComplete() {
+                Log.i(TAG, " onComplete Invoked")
+            }
+
+            override fun onNext(t: Int) {
+                Log.i(TAG, " onNext Invoked $t")
+            }
+
+            override fun onError(e: Throwable) {
+                Log.i(TAG, " onError Invoked")
+            }
+        }
+
+        return myIntObserver
     }
 }
