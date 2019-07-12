@@ -39,9 +39,16 @@ class MainActivity : AppCompatActivity() {
             myObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map {
-                    it.name = it.name.toUpperCase()
-                    return@map it
+//                .map {
+//                    it.name = it.name.toUpperCase()
+//                    return@map it
+//                }
+                .flatMap {
+                    var student1 = Student(it.name, "", 0, "")
+                    var student2 = Student("New Member ${it.name}", "", 0, "")
+
+                    it.name = it.name?.toUpperCase()
+                    return@flatMap Observable.just(it, student1, student2)
                 }
                 .subscribeWith(getObserver())
         )
